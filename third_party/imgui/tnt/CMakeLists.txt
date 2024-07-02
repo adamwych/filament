@@ -27,9 +27,14 @@ set(SRCS
     ${SRC_DIR}/imgui_draw.cpp
     ${SRC_DIR}/imgui_tables.cpp
     ${SRC_DIR}/imgui_widgets.cpp
+    ${SRC_DIR}/misc/freetype/imgui_freetype.cpp
 )
 
+
 add_library(${TARGET} STATIC ${PRIVATE_HDRS} ${PUBLIC_HDRS} ${SRCS})
+
+set(FREETYPE_PATH "../../../../freetype")
+target_include_directories(${TARGET} PRIVATE ${FREETYPE_PATH}/include)
 
 target_include_directories(${TARGET} PUBLIC ${PUBLIC_HDR_DIR} ${PRIVATE_HDR_DIR})
 
