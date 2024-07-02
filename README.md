@@ -356,3 +356,8 @@ Please see [LICENSE](/LICENSE).
 ## Disclaimer
 
 This is not an officially supported Google product.
+
+## NIBBLA Changes
+
+* Update ImGui to the same version used by `cimgui`.
+* Remove some code that broke build of `viewer` (broken because of ImGui update) - we don't use that app anyway.
