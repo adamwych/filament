@@ -229,6 +229,7 @@ void ImGuiHelper::processImGuiCommands(ImDrawData* commands, const ImGuiIO& io) 
                 pcmd.UserCallback(cmds, &pcmd);
             } else {
                 auto texture = (Texture const*)pcmd.TextureId;
+                auto didCreateNewMaterial = false;
                 MaterialInstance* materialInstance;
 #ifdef __ANDROID__
                 if (texture && texture->getTarget() == Texture::Sampler::SAMPLER_EXTERNAL) {
@@ -241,6 +242,9 @@ void ImGuiHelper::processImGuiCommands(ImDrawData* commands, const ImGuiIO& io) 
                 {
                     if (material2dIndex == mMaterial2dInstances.size()) {
                         mMaterial2dInstances.push_back(mMaterial2d->createInstance());
+#ifdef FILAMENT_SUPPORTS_METAL
+                        didCreateNewMaterial = true;
+#endif
                     }
                     materialInstance = mMaterial2dInstances[material2dIndex++];
                 }
@@ -255,12 +259,17 @@ void ImGuiHelper::processImGuiCommands(ImDrawData* commands, const ImGuiIO& io) 
                 } else {
                     materialInstance->setParameter("albedo", mTexture, mSampler);
                 }
-                rbuilder
+                // Defer rendering geometry using newly created material until next
+                // frame, because Metal does not like it when we create a
+                // MaterialInstance and then immediately use it in the same frame.
+                if (!didCreateNewMaterial) {
+                    rbuilder
                         .geometry(primIndex, RenderableManager::PrimitiveType::TRIANGLES,
                                 mVertexBuffers[bufferIndex], mIndexBuffers[bufferIndex],
                                 pcmd.IdxOffset, pcmd.ElemCount)
                         .blendOrder(primIndex, primIndex)
                         .material(primIndex, materialInstance);
+                }
                 primIndex++;
             }
         }
